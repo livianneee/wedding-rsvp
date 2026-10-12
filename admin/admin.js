@@ -11,6 +11,25 @@
   const SITE = (CFG.siteUrl || new URL("../", location.href).href).replace(/\/+$/, "") + "/";
   const linkFor = (token) => `${SITE}?i=${token}`;
 
+  // The message guests receive with their link. {{Name}} and [Invitation Link] are filled in per guest.
+  const MESSAGE_TEMPLATE = `Hello {{Name}}!
+
+Plot twist: WE’RE GETTING MARRIED! 💍🤍
+
+And guess what? You’re invited to witness the chaos, the happy tears, and two humans officially becoming each other’s problem forever. 🥹
+
+All the deets are right here 👇🏻
+💌 [Invitation Link]
+
+We’d LOVE to have you there to celebrate our big day with us!
+
+With love (and questionable life decisions),
+Rio & Olivia 🤍`;
+  // Function replacements so a "$" in a name is never treated as a special pattern
+  const messageFor = (r) => MESSAGE_TEMPLATE
+    .replaceAll("{{Name}}", () => r.guest_name)
+    .replaceAll("[Invitation Link]", () => linkFor(r.token));
+
   let rows = [];
   let sort = { key: "last_change", dir: -1 };
 
@@ -140,6 +159,17 @@
     return td;
   }
 
+  function copyButton(label, text, ariaLabel) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.dataset.copy = text;
+    btn.dataset.label = label;
+    btn.textContent = label;
+    btn.setAttribute("aria-label", ariaLabel);
+    return btn;
+  }
+
   function render() {
     const yes = rows.filter((r) => r.attending === true);
     const no = rows.filter((r) => r.attending === false);
@@ -164,15 +194,10 @@
         : "";
 
       const linkTd = document.createElement("td");
-      const copy = document.createElement("button");
-      copy.type = "button";
-      copy.className = "copy-btn";
-      copy.dataset.link = linkFor(r.token);
-      copy.textContent = "Copy link";
-      copy.setAttribute("aria-label", `Copy invite link for ${r.guest_name}`);
-      linkTd.append(copy);
+      // One button: the message already contains the guest's private link
+      linkTd.append(copyButton("Copy invitation", messageFor(r), `Copy invitation message with link for ${r.guest_name}`));
 
-      tr.append(cell(r.guest_name), ans, cell(r.attending === null ? "" : r.pax, "num"), cell(when), linkTd);
+      tr.append(cell(r.guest_name), linkTd, ans, cell(r.attending === null ? "" : r.pax, "num"), cell(when));
       return tr;
     }));
     $("#empty").hidden = rows.length > 0;
@@ -191,12 +216,30 @@
   $("#rows").addEventListener("click", async (e) => {
     const btn = e.target.closest(".copy-btn");
     if (!btn) return;
-    try { await navigator.clipboard.writeText(btn.dataset.link); btn.textContent = "Copied"; }
-    catch { window.prompt("Copy this link:", btn.dataset.link); }
-    setTimeout(() => { btn.textContent = "Copy link"; }, 1500);
+    btn.textContent = (await copyText(btn.dataset.copy)) ? "Copied" : "Copy failed";
+    setTimeout(() => { btn.textContent = btn.dataset.label; }, 1500);
   });
 
-  /* ---------- CSV download (includes each guest's private link) ---------- */
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Older / in-app browsers without the Clipboard API (keeps line breaks, unlike prompt())
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.className = "offscreen";
+      document.body.append(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch { ok = false; }
+      ta.remove();
+      return ok;
+    }
+  }
+
+  /* ---------- CSV download (includes each guest's private link and message) ---------- */
   $("#download").addEventListener("click", () => {
     // Leading = + - @ would run as a formula in Excel; prefix with ' to keep it as text.
     const csvCell = (v) => {
@@ -204,10 +247,10 @@
       if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const lines = [["Name", "Answer", "Guests", "Answered at", "Times submitted", "Invite link"]];
+    const lines = [["Name", "Answer", "Guests", "Answered at", "Times submitted", "Invite link", "Message"]];
     sorted().forEach((r) => lines.push([
       r.guest_name, ANSWERS[r.status][1], r.attending === null ? "" : r.pax,
-      fmtDate(r.responded_at), r.submit_count, linkFor(r.token),
+      fmtDate(r.responded_at), r.submit_count, linkFor(r.token), messageFor(r),
     ]));
     const csv = "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n");
     const a = document.createElement("a");
@@ -277,7 +320,7 @@
         await load();
       }
       $("#names").value = "";
-      addMsg(`Added ${added.length} guest${added.length === 1 ? "" : "s"}. Use “Copy link” or Download CSV to send their links.`);
+      addMsg(`Added ${added.length} guest${added.length === 1 ? "" : "s"}. Use “Copy invitation” or Download CSV to send their invitations.`);
     } catch (err) {
       if (err.status === 401) return sessionExpired();
       addMsg(`Couldn't add guests: ${err.message}`, true);
