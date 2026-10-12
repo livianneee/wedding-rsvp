@@ -1,0 +1,9 @@
+# Not needed for the build: keep them off Vercel. (The build copies only the site files into dist/.)
+README.md
+supabase/
+assets/img/_originals/
+.claude/
+.DS_Store
+**/.DS_Store
+.env*
+dist/

@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Design source files: the full-size originals stay on your Mac / in Figma
+assets/img/_originals/
+
+# Build output and generated config (made by scripts/build.mjs from env variables)
+dist/
+config.js
+
+# Local settings and tools
+.env*
+!.env.example
+.claude/
+.vercel/
