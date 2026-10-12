@@ -72,14 +72,19 @@
   // Options 0…MAX_PAX come from config so the limit lives in one place.
   pax.innerHTML = "";
   for (let i = 0; i <= MAX_PAX; i++) pax.add(new Option(String(i), String(i)));
+  const zeroOption = pax.options[0];
+  pax.value = "1";                                 // most invitations are for at least the guest themselves
 
   const attendance = () => form.querySelector('input[name="attending"]:checked')?.value || null;
 
   function syncPax() {
-    if (attendance() === "no") {
+    const notComing = attendance() === "no";
+    zeroOption.disabled = !notComing;              // 0 only makes sense for "No, can't make it"
+    if (notComing) {
       pax.value = "0";
       pax.disabled = true;                         // nobody is coming, so 0 is the only answer
     } else {
+      if (pax.value === "0") pax.value = "1";      // switching back from "No"
       pax.disabled = false;
     }
     pax.classList.toggle("is-empty", pax.value === "0");
