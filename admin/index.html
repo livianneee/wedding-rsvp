@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RSVP admin · Rio &amp; Olivia</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>RSVP admin</h1>
+
+    <p class="demo-banner" id="demo-banner" hidden>
+      Demo mode: showing sample guests. Nothing is saved. Fill in <code>config.js</code> (see README) to connect Supabase.
+    </p>
+
+    <!-- Sign in -->
+    <form class="panel login" id="login" hidden>
+      <h2>Sign in</h2>
+      <label>Username <input name="username" autocomplete="username" required></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+      <p class="msg msg--error" id="login-error" role="alert" hidden></p>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+
+    <!-- Guests + responses -->
+    <section class="panel" id="dashboard" hidden aria-labelledby="responses-title">
+      <div class="toolbar">
+        <h2 id="responses-title">Guests</h2>
+        <div class="toolbar__actions">
+          <button class="btn btn--ghost" type="button" id="refresh">Refresh</button>
+          <button class="btn" type="button" id="download">Download CSV</button>
+          <button class="btn btn--ghost" type="button" id="logout">Sign out</button>
+        </div>
+      </div>
+
+      <dl class="stats">
+        <div class="stat"><dt>Guests coming</dt><dd id="s-guests">0</dd></div>
+        <div class="stat"><dt>Attending</dt><dd id="s-yes">0</dd></div>
+        <div class="stat"><dt>Not attending</dt><dd id="s-no">0</dd></div>
+        <div class="stat"><dt>Not replied</dt><dd id="s-wait">0</dd></div>
+        <div class="stat"><dt>Invitations</dt><dd id="s-total">0</dd></div>
+      </dl>
+
+      <p class="msg msg--error" id="load-error" role="alert" hidden></p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-key="guest_name"><button type="button">Name</button></th>
+              <th data-key="status"><button type="button">Answer</button></th>
+              <th data-key="pax" class="num"><button type="button">Guests</button></th>
+              <th data-key="last_change" aria-sort="descending"><button type="button">Last updated</button></th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <p class="empty" id="empty" hidden>No guests yet. Add them below.</p>
+      </div>
+    </section>
+
+    <!-- Add guests -->
+    <form class="panel add" id="add" hidden aria-labelledby="add-title">
+      <h2 id="add-title">Add guests</h2>
+      <p class="hint">One invitation per line (a person or a household, e.g. “Kevin Tan &amp; family”). Each gets its own private link. Or upload a CSV: the first column is used as the name.</p>
+      <textarea id="names" aria-label="Guest names, one per line" placeholder="Kevin Tan&#10;Wijaya family&#10;Sarah Lim"></textarea>
+      <div class="add__row">
+        <button class="btn" type="submit">Add guests</button>
+        <label class="btn btn--ghost file-label">Upload CSV<input type="file" id="csv-file" accept=".csv,text/csv,text/plain"></label>
+      </div>
+      <p class="msg" id="add-msg" role="status" hidden></p>
+    </form>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

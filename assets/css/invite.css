@@ -1,0 +1,536 @@
+/* Invitation page. Measurements are from the Figma frames (drawn at 390px wide).
+   Large script headings shrink on phones narrower than 390px so nothing overflows. */
+
+[hidden] { display: none !important; }
+
+body { overflow-x: hidden; }
+
+.script {
+  margin: 0;
+  font-family: var(--font-script);
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+.body-lg { font: 500 20px/normal var(--font-serif); }
+.body-lg--24 { line-height: 24px; }
+.body-md { font: 500 16px/24px var(--font-serif); }
+
+.title-48 { font-size: min(48px, 12.3vw); line-height: 1; }
+.title-48--tight { line-height: 40px; }
+
+.text-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: var(--text-width);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.stack-8  { display: flex; flex-direction: column; gap: 8px; }
+.stack-16 { display: flex; flex-direction: column; gap: 16px; }
+.stack-24 { display: flex; flex-direction: column; gap: 24px; }
+
+.column {
+  position: relative;
+  z-index: 1;
+  max-width: var(--column);
+  margin-inline: auto;
+}
+
+.section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px var(--gutter);
+}
+
+/* ---------- Landing (112:652) ---------- */
+.landing {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--paper) url("../img/bg-landing.jpg") center / cover no-repeat;
+}
+
+.landing__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: var(--column);
+  padding: 72px var(--gutter);
+  padding-top: max(72px, calc(env(safe-area-inset-top) + 48px));
+}
+
+.landing__tagline { text-align: center; }
+.landing__love { font-size: min(36px, 9.2vw); line-height: 36px; }
+.landing__sub { font: 400 20px/normal var(--font-serif); }
+
+.landing__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 64px;
+}
+
+.landing__cover {
+  width: min(300px, 100%);
+  height: auto;
+  aspect-ratio: 300 / 369;
+  object-fit: cover;
+  margin-bottom: -64px;
+}
+
+.landing__names {
+  position: relative;          /* sits over the bottom of the cover art */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 16px;
+  text-align: center;
+}
+
+.landing__dear {
+  color: var(--ink-strong);
+  font: 700 20px/40px var(--font-serif);
+}
+
+.landing__couple {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  height: 1em;                 /* Figma box is exactly 64px tall */
+  font-size: min(64px, 16.4vw);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.landing__invited { font: 400 16px/24px var(--font-serif); }
+
+/* ---------- Invitation content (112:672) ---------- */
+.invite {
+  position: relative;
+  background: var(--paper);
+  overflow-x: clip;
+}
+.invite::before {             /* paper texture at 30% */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../img/bg-content.jpg") top center / cover no-repeat;
+  opacity: 0.3;
+  pointer-events: none;
+}
+.invite.is-entering { animation: invite-in 0.7s ease both; }
+@keyframes invite-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Intro */
+.intro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 80px var(--gutter) 0;
+}
+.intro__text { gap: 24px; }
+.intro__hello { font-size: min(40px, 10.25vw); line-height: 36px; }
+.intro__hello:focus { outline: none; }
+.intro__approved { color: var(--accent); font-weight: 700; }
+
+.intro__swan {
+  width: calc(100% + 2 * var(--gutter));
+  max-width: none;
+  height: auto;
+  margin-inline: calc(-1 * var(--gutter));
+  aspect-ratio: 390 / 180;
+  object-fit: cover;
+}
+
+.ribbon {
+  position: absolute;
+  width: 104px;
+  height: 85px;
+  object-fit: cover;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.ribbon--left  { left: -46px;  top: 229px; transform: rotate(30deg); }
+.ribbon--right { right: -40px; top: 103px; transform: rotate(-30deg); }
+
+/* Meet our humans */
+.humans__text { gap: 32px; }
+.humans__choices { font-size: 28px; line-height: 24px; }
+.humans__announce {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 64px;
+  color: var(--accent);
+  font-size: min(32px, 8.2vw);
+  line-height: 28px;
+}
+
+.couple {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  width: 100%;
+  max-width: var(--text-width);
+  padding-top: 32px;
+}
+.couple__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.couple__row--bride { justify-content: flex-end; gap: 16px; }
+
+.couple__portrait {
+  flex-shrink: 0;
+  width: min(144px, 45%);
+  height: auto;
+  aspect-ratio: 144 / 177;
+  object-fit: cover;
+}
+.couple__name {
+  font-size: min(36px, 9.2vw);
+  line-height: 1;
+  white-space: nowrap;
+}
+.couple__name--right { text-align: right; }
+
+.couple__amp {                 /* the large "&" that bridges the two portraits */
+  position: absolute;
+  right: 36.9%;
+  top: -0.93em;
+  font-size: min(128px, 32.8vw);
+  line-height: normal;
+  pointer-events: none;
+}
+
+/* Save the date */
+.save-date__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 390 / 320;
+  object-fit: cover;
+  pointer-events: none;
+}
+.save-date__text { gap: 16px; padding-top: 48px; }
+.save-date__dogs {
+  width: min(200px, 62%);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.schedule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding-bottom: 12px;
+}
+
+.date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  height: 80px;
+  padding-block: 12px;
+  font: 400 20px/normal var(--font-caps);
+}
+.date__rule { align-self: stretch; width: 0; border-left: 1px solid var(--ink); }
+.date__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 8px;
+}
+.date__num { margin-bottom: -6px; font-size: 32px; }
+.date__month { font-size: 14px; }
+
+.event {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-block: 12px;
+}
+.event__title {
+  color: var(--accent);
+  font-size: min(32px, 8.2vw);
+  line-height: normal;
+}
+.event__time {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 8px;
+  font: 400 16px/normal var(--font-caps);
+}
+.event__place { font: 400 16px/normal var(--font-caps); }
+.event .btn { margin-top: 8px; }   /* 8px gap + 8px = 16px, as in the design */
+
+.deco { position: absolute; pointer-events: none; object-fit: cover; }
+.deco--42 { right: 13px; top: 457px; width: 96px; height: 79px; }
+.deco--43 { left: -15px; top: 686px; width: 124px; height: 102px; transform: rotate(30deg); }
+
+.save-date__table {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 342 / 280;
+  object-fit: cover;
+}
+
+/* RSVP card + responses */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  padding: 32px 24px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-card);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.card:focus { outline: none; }
+
+.rsvp-form { align-items: stretch; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.field--choice { display: block; }
+
+.field__label {
+  padding: 0;
+  color: var(--ink);
+  font: 400 14px/normal var(--font-caps);
+}
+.field__label--lg { min-height: 32px; font-size: 16px; }
+.req { color: var(--required); font-weight: 700; }
+
+/* 16px (design: 14px) so iOS Safari doesn't zoom the page when a field is tapped */
+.control {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--field);
+  color: var(--ink);
+  font: 400 16px/normal var(--font-serif);
+}
+.control::placeholder { color: var(--placeholder); opacity: 1; }
+.control[readonly] { cursor: default; }
+.control[aria-invalid="true"] { border-color: var(--required); }
+
+.select { position: relative; }
+.select .control {
+  padding-right: 44px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.select .control.is-empty { color: var(--placeholder); }
+.select .control:disabled { cursor: not-allowed; opacity: 0.7; }
+.select__icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.radio {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 4px;
+  font: 400 14px/normal var(--font-caps);
+  cursor: pointer;
+}
+.radio input {
+  position: absolute;
+  opacity: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+.radio__mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  background: var(--field);
+}
+.radio__mark::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-strong);
+  transform: scale(0);
+  transition: transform 0.12s ease;
+}
+.radio input:checked + .radio__mark::after { transform: scale(1); }
+.radio input:focus-visible + .radio__mark { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.field__error,
+.form-error {
+  color: var(--required);
+  font: 600 15px/1.3 var(--font-serif);
+}
+.form-error { text-align: center; }
+
+.btn--block { width: 100%; padding-block: 10px; line-height: 22px; }
+
+.reply { text-align: center; }
+.reply__title {
+  margin-inline: -16px;        /* as in Figma, the title may run into the card padding */
+  font-size: min(36px, 8.6vw);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.link-btn {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 400 14px/normal var(--font-caps);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Gift */
+.gift__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 254px;
+  padding: 12px 24px 0;
+  border-radius: var(--radius-card);
+}
+.gift__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-card);
+  pointer-events: none;
+}
+.gift__account {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding: 16px 24px;
+  font: 600 24px/normal var(--font-serif);
+}
+.gift__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.gift__copy:hover span { text-decoration: underline; text-underline-offset: 4px; }
+.gift__note { position: relative; width: 100%; text-align: center; font: 500 16px/24px var(--font-serif); }
+
+/* Closing */
+.closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--gutter) calc(104px + env(safe-area-inset-bottom));
+}
+.closing__see { font-size: min(40px, 10.25vw); line-height: 36px; }
+.closing__dogs {
+  width: min(320px, 100%);
+  height: auto;
+  aspect-ratio: 320 / 263;
+  object-fit: cover;
+}
+.closing__sign { padding-top: 16px; }
+.closing__hosts { font-size: 32px; line-height: 36px; }
+
+/* Feedback */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 10;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  background: var(--ink-strong);
+  box-shadow: var(--shadow-button);
+  color: var(--on-button);
+  font: 400 13px/18px var(--font-caps);
+  white-space: nowrap;
+}
+
+.demo-banner {
+  position: fixed;
+  top: env(safe-area-inset-top);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 6px 12px;
+  background: #fff3cd;
+  color: #6b4e00;
+  font: 600 14px/1.3 system-ui, sans-serif;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Shown instead of the form when the link has no valid invitation */
+.notice { text-align: center; }

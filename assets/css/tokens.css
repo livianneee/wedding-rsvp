@@ -1,0 +1,90 @@
+/* Shared by the invitation and the admin page. Values come from the Figma file. */
+
+@font-face {
+  font-family: "CINCIN";
+  src: url("../fonts/cincin.woff2") format("woff2"),
+       url("../fonts/cincin.otf") format("opentype");
+  font-display: swap;
+}
+
+:root {
+  /* Colour */
+  --paper: #fffbf7;
+  --ink: #466ca1;          /* body text, borders */
+  --ink-strong: #214777;   /* buttons, "Dear …" */
+  --accent: #1658a9;       /* highlighted script lines */
+  --on-button: #faf5f0;
+  --required: #d70000;
+  --placeholder: rgba(70, 108, 161, 0.6);
+  --field: #ffffff;
+
+  /* Type */
+  --font-script: "CINCIN", "Brush Script MT", cursive;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-caps: "Cinzel", "Times New Roman", serif;
+
+  /* Effects */
+  --shadow-button: 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --radius-control: 8px;
+  --radius-card: 16px;
+
+  /* Layout: the design is drawn on a 390px phone */
+  --gutter: 24px;
+  --column: 430px;
+  --text-width: 320px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img { display: block; max-width: 100%; }
+
+p { margin: 0; }
+
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Primary button (Figma: "Button Primary 1") */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 40px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--ink-strong);
+  box-shadow: var(--shadow-button);
+  color: var(--on-button);
+  font: 400 14px/20px var(--font-caps);
+  letter-spacing: 0.14px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.btn:hover { background: #1a3a63; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
