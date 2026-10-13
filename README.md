@@ -95,7 +95,11 @@ weekly until 30 October, and right before sending invitations.
 Seats: every guest can choose 1–5 people. To change the limit, edit `maxPax` in `scripts/build.mjs`
 **and** the two `5`s in `supabase/setup.sql`, then re-run the SQL.
 
-To remove a guest added by mistake: Supabase → Table Editor → `guests` → select the row → Delete.
+To remove guests: tick them in the admin list (or the top checkbox for all) → **Remove selected** →
+confirm. This permanently deletes them and any answer they gave, and their links stop working.
+
+**After updating the code from GitHub, re-run `supabase/setup.sql`** in the SQL Editor so new
+database functions (like guest removal) exist. It's safe to run again: it never deletes guests.
 
 ## Test before sending invitations
 

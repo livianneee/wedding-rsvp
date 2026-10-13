@@ -31,6 +31,7 @@ Rio & Olivia 🤍`;
     .replaceAll("[Invitation Link]", () => linkFor(r.token));
 
   let rows = [];
+  const selected = new Set();                      // ids of ticked guests; survives sorting and refresh
   let sort = { key: "last_change", dir: -1 };
 
   /* ---------- Session ---------- */
@@ -120,7 +121,7 @@ Rio & Olivia 🤍`;
     if (!s) return sessionExpired();
     try {
       const data = await api(
-        "/rest/v1/guests?select=guest_name,token,attending,pax,submit_count,created_at,responded_at",
+        "/rest/v1/guests?select=id,guest_name,token,attending,pax,submit_count,created_at,responded_at",
         { token: s.token },
       );
       rows = data.map(withDerived);
@@ -179,8 +180,22 @@ Rio & Olivia 🤍`;
     $("#s-wait").textContent = rows.length - yes.length - no.length;
     $("#s-total").textContent = rows.length;
 
+    // Forget ticks for guests that no longer exist (removed elsewhere, or after reload)
+    const ids = new Set(rows.map((r) => r.id));
+    selected.forEach((id) => { if (!ids.has(id)) selected.delete(id); });
+
     $("#rows").replaceChildren(...sorted().map((r) => {
       const tr = document.createElement("tr");
+      tr.classList.toggle("is-selected", selected.has(r.id));
+
+      const checkTd = document.createElement("td");
+      checkTd.className = "check";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.dataset.id = r.id;
+      box.checked = selected.has(r.id);
+      box.setAttribute("aria-label", `Select ${r.guest_name}`);
+      checkTd.append(box);
 
       const ans = document.createElement("td");
       const pill = document.createElement("span");
@@ -197,10 +212,11 @@ Rio & Olivia 🤍`;
       // One button: the message already contains the guest's private link
       linkTd.append(copyButton("Copy invitation", messageFor(r), `Copy invitation message with link for ${r.guest_name}`));
 
-      tr.append(cell(r.guest_name), linkTd, ans, cell(r.attending === null ? "" : r.pax, "num"), cell(when));
+      tr.append(checkTd, cell(r.guest_name), linkTd, ans, cell(r.attending === null ? "" : r.pax, "num"), cell(when));
       return tr;
     }));
     $("#empty").hidden = rows.length > 0;
+    syncSelection();
 
     document.querySelectorAll("th[data-key]").forEach((th) => {
       th.setAttribute("aria-sort", th.dataset.key === sort.key ? (sort.dir === 1 ? "ascending" : "descending") : "none");
@@ -237,6 +253,90 @@ Rio & Olivia 🤍`;
       ta.remove();
       return ok;
     }
+  }
+
+  /* ---------- Select + remove guests ---------- */
+  function syncSelection() {
+    const n = selected.size;
+    $("#selection-bar").hidden = n === 0;
+    $("#selection-count").textContent = `${n} selected`;
+    const all = $("#select-all");
+    all.checked = n > 0 && n === rows.length;
+    all.indeterminate = n > 0 && n < rows.length;
+    all.disabled = rows.length === 0;
+  }
+
+  $("#rows").addEventListener("change", (e) => {
+    const box = e.target.closest('input[type="checkbox"][data-id]');
+    if (!box) return;
+    const id = Number(box.dataset.id);
+    box.checked ? selected.add(id) : selected.delete(id);
+    box.closest("tr").classList.toggle("is-selected", box.checked);
+    syncSelection();
+  });
+
+  $("#select-all").addEventListener("change", (e) => {
+    selected.clear();
+    if (e.target.checked) rows.forEach((r) => selected.add(r.id));
+    render();
+  });
+
+  $("#clear-selection").addEventListener("click", () => { selected.clear(); render(); });
+
+  $("#remove-selected").addEventListener("click", async () => {
+    const victims = rows.filter((r) => selected.has(r.id));
+    if (!victims.length) return;
+
+    const names = victims.map((r) => r.guest_name).sort((a, b) => a.localeCompare(b));
+    const shown = names.slice(0, 10).map((n) => `• ${n}`).join("\n") + (names.length > 10 ? `\n…and ${names.length - 10} more` : "");
+    const replied = victims.filter((r) => r.attending !== null).length;
+    const warning = [
+      `Remove ${victims.length} guest${victims.length === 1 ? "" : "s"}?`,
+      "",
+      shown,
+      "",
+      replied ? `⚠️ ${replied} of them already replied. Their answers will be deleted too.` : "",
+      "Their invitation links will stop working. This can't be undone.",
+    ].filter((line, i, all) => line || all[i - 1]).join("\n");
+    if (!window.confirm(warning)) return;
+
+    const btn = $("#remove-selected");
+    btn.disabled = true;
+    const errEl = $("#load-error");
+    errEl.hidden = true;
+    try {
+      let removed;
+      if (DEMO) {
+        rows = rows.filter((r) => !selected.has(r.id));
+        removed = victims.length;
+      } else {
+        const s = getSession();
+        if (!s) return sessionExpired();
+        removed = await api("/rest/v1/rpc/admin_remove_guests", {
+          method: "POST", token: s.token, body: { p_ids: victims.map((r) => r.id) },
+        });
+      }
+      selected.clear();
+      if (DEMO) render(); else await load();
+      addMsg("", false);
+      toastStatus(`Removed ${removed} guest${removed === 1 ? "" : "s"}.`);
+    } catch (err) {
+      if (err.status === 401) return sessionExpired();
+      errEl.textContent = `Couldn't remove guests: ${err.message}`;
+      errEl.hidden = false;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Short confirmation in the selection bar's place, announced to screen readers
+  let statusTimer;
+  function toastStatus(text) {
+    const el = $("#remove-status");
+    el.textContent = text;
+    el.hidden = false;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => { el.hidden = true; }, 3000);
   }
 
   /* ---------- CSV download (includes each guest's private link and message) ---------- */
@@ -308,7 +408,8 @@ Rio & Olivia 🤍`;
     try {
       let added;
       if (DEMO) {
-        added = names.map((guest_name) => ({ guest_name, token: demoToken() }));
+        const nextId = Math.max(0, ...rows.map((r) => r.id)) + 1;
+        added = names.map((guest_name, i) => ({ id: nextId + i, guest_name, token: demoToken() }));
         rows.push(...added.map((g) => withDerived({
           ...g, attending: null, pax: null, submit_count: 0, created_at: new Date().toISOString(), responded_at: null,
         })));
@@ -336,9 +437,9 @@ Rio & Olivia 🤍`;
   function demoRows() {
     const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString();
     return [
-      { guest_name: "Kevin Tan & family", token: "demo", attending: true, pax: 4, submit_count: 1, created_at: ago(90), responded_at: ago(30) },
-      { guest_name: "Sarah Lim", token: demoToken(), attending: false, pax: 0, submit_count: 2, created_at: ago(90), responded_at: ago(5) },
-      { guest_name: "Wijaya family", token: demoToken(), attending: null, pax: null, submit_count: 0, created_at: ago(90), responded_at: null },
+      { id: 1, guest_name: "Kevin Tan & family", token: "demo", attending: true, pax: 4, submit_count: 1, created_at: ago(90), responded_at: ago(30) },
+      { id: 2, guest_name: "Sarah Lim", token: demoToken(), attending: false, pax: 0, submit_count: 2, created_at: ago(90), responded_at: ago(5) },
+      { id: 3, guest_name: "Wijaya family", token: demoToken(), attending: null, pax: null, submit_count: 0, created_at: ago(90), responded_at: null },
     ];
   }
 

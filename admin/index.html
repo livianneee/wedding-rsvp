@@ -49,10 +49,19 @@
 
       <p class="msg msg--error" id="load-error" role="alert" hidden></p>
 
+      <!-- Appears when at least one guest is ticked -->
+      <div class="selection-bar" id="selection-bar" hidden>
+        <span id="selection-count" role="status">0 selected</span>
+        <button class="btn btn--ghost" type="button" id="clear-selection">Clear</button>
+        <button class="btn btn--danger" type="button" id="remove-selected">Remove selected</button>
+      </div>
+      <p class="msg msg--ok remove-status" id="remove-status" role="status" hidden></p>
+
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th class="check"><input type="checkbox" id="select-all" aria-label="Select all guests"></th>
               <th data-key="guest_name"><button type="button">Name</button></th>
               <th>Invitation</th>
               <th data-key="status"><button type="button">Answer</button></th>

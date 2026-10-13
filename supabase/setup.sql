@@ -173,3 +173,36 @@ $$;
 
 revoke all on function public.admin_add_guests(text[]) from public, anon;
 grant execute on function public.admin_add_guests(text[]) to authenticated;
+
+-------------------------------------------------------------------------------
+-- 5. Admin: permanently remove guests (and their answers). Their links stop working.
+--    Returns how many rows were deleted.
+-------------------------------------------------------------------------------
+create or replace function public.admin_remove_guests(p_ids bigint[])
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_count integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Not allowed' using errcode = '42501';
+  end if;
+
+  if coalesce(cardinality(p_ids), 0) = 0 then
+    raise exception 'No guests selected' using errcode = '22023';
+  end if;
+  if cardinality(p_ids) > 500 then
+    raise exception 'Remove at most 500 guests at a time' using errcode = '22023';
+  end if;
+
+  delete from public.guests where id = any (p_ids);
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+
+revoke all on function public.admin_remove_guests(bigint[]) from public, anon;
+grant execute on function public.admin_remove_guests(bigint[]) to authenticated;
